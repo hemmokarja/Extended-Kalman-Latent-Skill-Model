@@ -438,7 +438,7 @@ class EKFSkillRating:
         H = np.array([[pdf/self.config.sigma_match, pdf/self.config.sigma_match,
                       -pdf/self.config.sigma_match, -pdf/self.config.sigma_match]])
 
-        # observation noise
+        # observation noise (Bernoulli variance)
         R = pred_prob * (1 - pred_prob)
 
         # kalman gain computation
