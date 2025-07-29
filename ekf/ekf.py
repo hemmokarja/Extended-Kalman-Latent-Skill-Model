@@ -66,20 +66,21 @@ class Matches:
             "winner",
             "player1_time_delta",
             "player2_time_delta",
+            "match_index",
         ]
         if not all(col in df.columns for col in required_cols):
             missing = [col for col in required_cols if col not in df.columns]
             raise ValueError(f"Missing required columns: {missing}")
 
         matches = []
-        for global_idx, (_, row) in enumerate(df.iterrows()):
+        for _, row in df.iterrows():
             match = Match(
-                player1=str(row["player1"]),
-                player2=str(row["player2"]),
-                winner=str(row["winner"]),
-                player1_time_delta=float(row["player1_time_delta"]),
-                player2_time_delta=float(row["player2_time_delta"]),
-                match_index=global_idx,
+                player1=str(row.player1),
+                player2=str(row.player2),
+                winner=str(row.winner),
+                player1_time_delta=float(row.player1_time_delta),
+                player2_time_delta=float(row.player2_time_delta),
+                match_index=int(row.match_index),
             )
             matches.append(match)
 
@@ -420,7 +421,9 @@ class EKFSkillRating:
             self.history.update_player(match.player2, match.match_index, new_state2)
         
         end = time.time()
-        self.logger.info(f"Fitting completed in {end - start:.2f} seconds")
+        self.logger.info(
+            f"Fitting {len(matches)} matches completed in {end - start:.2f} seconds"
+        )
 
         return self.history
 
