@@ -207,75 +207,158 @@ class SkillHistory:
         player_ids: Optional[List[str]] = None,
         show: str = "effective",  # "effective" or "decomposed"
         confidence: Optional[float] = None,  # e.g., 0.95 for 95% CI
+        show_all: bool = True,  # whether to show other players in gray background
     ):
-        if player_ids is None:
-            player_ids = list(self.players.keys())
-        elif isinstance(player_ids, str):
+        if isinstance(player_ids, str):
             player_ids = [player_ids]
 
-        def _extract_series(states, attr):
-            return [getattr(s, attr) for s in states]
+        # determine which players to highlight vs show in background
+        all_player_ids = list(self.players.keys())
+        if player_ids is None:
+            highlighted_players = all_player_ids
+            background_players = []
+        else:
+            highlighted_players = player_ids
+            background_players = [
+                pid for pid in all_player_ids if pid not in player_ids
+            ] if show_all else []
 
-        def _extract_std(states, attr):
-            return [np.sqrt(getattr(s, attr)) for s in states]
-
-        def _plot_line(x, y, label, style, color):
-            plt.plot(x, y, label=label, linestyle=style, color=color)
-
-        def _plot_uncertainty(x, mean, std, color, z):
-            margin = np.array(std) * z
-            lower = np.array(mean) - margin
-            upper = np.array(mean) + margin
-            plt.fill_between(x, lower, upper, color=color, alpha=0.1)
-
-        # get z-score for the given confidence interval (e.g., 0.95 -> ~1.96)
+        # get z-score for confidence interval
         z_score = st.norm.ppf(0.5 + confidence / 2) if confidence else None
-
         color_cycle = itertools.cycle(plt.colormaps["tab10"].colors)
-        plt.figure(figsize=(12, 6))
 
-        for player_id in sorted(player_ids):
-            if player_id not in self.players:
-                print(f"Skipping missing player: {player_id}")
-                continue
-
-            states, match_indices = (
-                self.players[player_id].get_all_prematch_states_and_indices()
-            )
-
-            color = next(color_cycle)
-
-            if show == "effective":
-                means = _extract_series(states, "effective_skill")
-                _plot_line(match_indices, means, f"{player_id} (Eff)", "-", color)
+        if show == "effective":
+            plt.figure(figsize=(12, 6))
+            
+            # Plot background players in gray
+            for player_id in background_players:
+                if player_id not in self.players:
+                    continue
+                states, match_indices = (
+                    self.players[player_id].get_all_prematch_states_and_indices()
+                )
+                means = [s.effective_skill for s in states]
+                plt.plot(match_indices, means, color="gray", alpha=0.15, linewidth=1)
+            
+            # Plot highlighted players with colors
+            for player_id in highlighted_players:
+                if player_id not in self.players:
+                    print(f"Skipping missing player: {player_id}")
+                    continue
+                
+                states, match_indices = (
+                    self.players[player_id].get_all_prematch_states_and_indices()
+                )
+                color = next(color_cycle)
+                
+                means = [s.effective_skill for s in states]
+                plt.plot(
+                    match_indices, means, label=f"{player_id}", color=color, linewidth=1
+                )
+                
                 if confidence:
-                    stds = _extract_std(states, "effective_skill_variance")
-                    _plot_uncertainty(match_indices, means, stds, color, z_score)
+                    stds = [np.sqrt(s.effective_skill_variance) for s in states]
+                    margin = np.array(stds) * z_score
+                    lower = np.array(means) - margin
+                    upper = np.array(means) + margin
+                    plt.fill_between(
+                        match_indices, lower, upper, color=color, alpha=0.1
+                    )
+            
+            plt.xlabel("Match index")
+            plt.ylabel("Skill")
+            plt.title("Player Skill Trajectories")
+            plt.legend(loc="best")
+            plt.grid(True)
+            plt.tight_layout()
+            plt.show()
+            
+        elif show == "decomposed":
+            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
+            
+            # plot background players in gray on both subplots
+            for player_id in background_players:
+                if player_id not in self.players:
+                    continue
+                states, match_indices = (
+                    self.players[player_id].get_all_prematch_states_and_indices()
+                )
+                
+                skill_means = [s.skill_mean for s in states]
+                momentum_means = [s.momentum_mean for s in states]
 
-            elif show == "decomposed":
-                components = [
-                    ("skill_mean", "skill_variance", "--", "Skill"),
-                    ("momentum_mean", "momentum_variance", "-.", "Mom"),
-                ]
-                for mean_attr, var_attr, style, label_suffix in components:
-                    means = _extract_series(states, mean_attr)
-                    _plot_line(match_indices, means, f"{player_id} ({label_suffix})", style, color)
-                    if confidence:
-                        stds = _extract_std(states, var_attr)
-                        _plot_uncertainty(match_indices, means, stds, color, z_score)
-
-            else:
-                raise ValueError(
-                    "Invalid show argument: use 'effective' or 'decomposed'"
+                ax1.plot(
+                    match_indices, skill_means, color="gray", alpha=0.3, linewidth=1
+                )
+                ax2.plot(
+                    match_indices, momentum_means, color="gray", alpha=0.3, linewidth=1
                 )
 
-        plt.xlabel("Match index")
-        plt.ylabel("Skill")
-        plt.title("Player Skill Trajectories")
-        plt.legend(loc="best")
-        plt.grid(True)
-        plt.tight_layout()
-        plt.show()
+            # plot highlighted players with colors
+            for player_id in highlighted_players:
+                if player_id not in self.players:
+                    print(f"Skipping missing player: {player_id}")
+                    continue
+
+                states, match_indices = (
+                    self.players[player_id].get_all_prematch_states_and_indices()
+                )
+                color = next(color_cycle)
+                
+                # skill subplot
+                skill_means = [s.skill_mean for s in states]
+                ax1.plot(
+                    match_indices,
+                    skill_means,
+                    label=f"{player_id}",
+                    color=color,
+                    linewidth=1,
+                )
+                
+                if confidence:
+                    skill_stds = [np.sqrt(s.skill_variance) for s in states]
+                    margin = np.array(skill_stds) * z_score
+                    lower = np.array(skill_means) - margin
+                    upper = np.array(skill_means) + margin
+                    ax1.fill_between(
+                        match_indices, lower, upper, color=color, alpha=0.1
+                    )
+
+                # momentum subplot
+                momentum_means = [s.momentum_mean for s in states]
+                ax2.plot(
+                    match_indices,
+                    momentum_means,
+                    label=f"{player_id}",
+                    color=color,
+                    linewidth=1,
+                )
+
+                if confidence:
+                    momentum_stds = [np.sqrt(s.momentum_variance) for s in states]
+                    margin = np.array(momentum_stds) * z_score
+                    lower = np.array(momentum_means) - margin
+                    upper = np.array(momentum_means) + margin
+                    ax2.fill_between(
+                        match_indices, lower, upper, color=color, alpha=0.1
+                    )
+
+            ax1.set_ylabel("Skill")
+            ax1.set_title("Player Skill Trajectories")
+            ax1.legend(loc="best")
+            ax1.grid(True)
+            
+            ax2.set_xlabel("Match index")
+            ax2.set_ylabel("Momentum")
+            ax2.set_title("Player Momentum Trajectories")
+            ax2.legend(loc="best")
+            ax2.grid(True)
+            
+            plt.tight_layout()
+            plt.show()
+            
+        else:
+            raise ValueError("Invalid show argument: use 'effective' or 'decomposed'")
 
 
 class EKFSkillRating:
