@@ -141,7 +141,7 @@ class PlayerHistory:
         self.match_indices = [-1]  # track which indices we have states for
 
     def add_state(self, match_index: int, state: PlayerState):
-        if match_index < max(self.match_indices):
+        if match_index <= max(self.match_indices):
             raise ValueError(
                 f"match_index {match_index} must be greater than all previous "
                 f"indices {self.match_indices}"
@@ -158,7 +158,6 @@ class PlayerHistory:
         return self.states[most_recent_index]
 
     def current_state(self) -> PlayerState:
-        """Get the most recent state."""
         latest_index = max(self.match_indices)
         return self.states[latest_index]
 
