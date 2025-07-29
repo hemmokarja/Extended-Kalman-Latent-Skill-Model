@@ -1,4 +1,4 @@
-# EKF Skill Rating System
+# 📈 EKF Skill Rating System
 
 A sophisticated player rating system based on Extended Kalman Filters (EKF) with Probit observation model for modeling latent skill and momentum in 1-vs-1 competitive matches. Unlike traditional rating systems that treat player ability as static, this approach recognizes that performance consists of two distinct components: persistent skill that evolves slowly over time, and transient momentum that captures recent form and psychological factors. The system continuously updates these latent variables as new match results arrive, providing probabilistic predictions that account for both the uncertainty in player abilities and the time elapsed since their last competition.
 
@@ -11,7 +11,7 @@ A sophisticated player rating system based on Extended Kalman Filters (EKF) with
 - **Flexible Framework**: Applicable to any 1-vs-1 binary outcome sport or competition
 - **Efficient Implementation**: Fast fitting and prediction using vectorized operations
 
-## 📊 Mathematical Foundation
+## 📚 Mathematical Foundation
 
 ### Problem Formulation
 
@@ -98,7 +98,7 @@ This project uses the `uv` package manager. Install dependencies with:
 uv sync
 ```
 
-## 📈 Examples
+## 🧪 Examples
 
 ### Simulated Data
 `example_sim.ipynb` demonstrates the model's performance on controlled simulated data:
@@ -111,7 +111,7 @@ uv sync
 - Compares prediction accuracy against official ATP rankings
 - Demonstrates practical performance on real-world competitive data
 
-## 🎯 Usage
+## 🚀 Quick Start
 
 ```python
 from ekf.ekf import EKFConfig, EKFSkillRating, Matches
