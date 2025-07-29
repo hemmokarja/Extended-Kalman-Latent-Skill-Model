@@ -423,8 +423,9 @@ class EKFSkillRating:
         pdf = st.norm.pdf(delta)
 
         # state vectors
-        x = np.array([state1.skill_mean, state1.momentum_mean, 
-                     state2.skill_mean, state2.momentum_mean])
+        x = np.array([
+            state1.skill_mean, state1.momentum_mean, state2.skill_mean, state2.momentum_mean
+        ])
 
         # prior covariance matrix
         P = np.array([
@@ -434,7 +435,7 @@ class EKFSkillRating:
             [0.0, 0.0, state2.skill_momentum_covariance, state2.momentum_variance]
         ])
 
-        # jacobian matrix
+        # jacobian of observation model w.r.t. [sk1, mom1, sk2, mom2]
         H = np.array([[pdf/self.config.sigma_match, pdf/self.config.sigma_match,
                       -pdf/self.config.sigma_match, -pdf/self.config.sigma_match]])
 
