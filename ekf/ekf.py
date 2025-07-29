@@ -230,7 +230,7 @@ class SkillHistory:
         if show == "effective":
             plt.figure(figsize=(12, 6))
             
-            # Plot background players in gray
+            # plot background players in gray
             for player_id in background_players:
                 if player_id not in self.players:
                     continue
@@ -238,9 +238,9 @@ class SkillHistory:
                     self.players[player_id].get_all_prematch_states_and_indices()
                 )
                 means = [s.effective_skill for s in states]
-                plt.plot(match_indices, means, color="gray", alpha=0.15, linewidth=1)
-            
-            # Plot highlighted players with colors
+                plt.plot(match_indices, means, color="gray", alpha=0.1, linewidth=1)
+
+            # plot highlighted players with colors
             for player_id in highlighted_players:
                 if player_id not in self.players:
                     print(f"Skipping missing player: {player_id}")
