@@ -360,7 +360,7 @@ class SkillHistory:
             raise ValueError("Invalid show argument: use 'effective' or 'decomposed'")
 
 
-class EKFSkillRating:
+class EKFSkillModel:
     def __init__(self, config: EKFConfig):
         self.config = config
         self.history = None

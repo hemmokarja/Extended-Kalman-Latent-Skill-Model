@@ -114,7 +114,7 @@ uv sync
 ## 🚀 Quick Start
 
 ```python
-from ekf.ekf import EKFConfig, EKFSkillRating, Matches
+from ekf.ekf import EKFConfig, EKFSkillModel, Matches
 from ekf import simulated_data
 
 matches_df = simulated_data.simulate_matches(n_players=3, n_matches=100)
@@ -122,9 +122,9 @@ matches_df = simulated_data.simulate_matches(n_players=3, n_matches=100)
 matches = Matches.from_pandas(matches_df)
 
 config = EKFConfig()
-ekf = EKFSkillRating(config)
+ekf = EKFSkillModel(config)
 
-history = model.fit(matches)
+history = ekf.fit(matches)
 
 prob = model.predict_proba(
     "Player-0",
