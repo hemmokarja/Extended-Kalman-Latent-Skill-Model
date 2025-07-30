@@ -1,6 +1,6 @@
 # 📈 EKF Skill Rating System
 
-A sophisticated player rating system based on Extended Kalman Filters (EKF) with Probit observation model for modeling latent skill and momentum in 1-vs-1 competitive matches. Unlike traditional rating systems that treat player ability as static, this approach recognizes that performance consists of two distinct components: persistent skill that evolves slowly over time, and transient momentum that captures recent form and psychological factors. The system continuously updates these latent variables as new match results arrive, providing probabilistic predictions that account for both the uncertainty in player abilities and the time elapsed since their last competition.
+A sophisticated player rating system based on Extended Kalman Filters (EKF) with a Probit observation model, designed for 1-vs-1 competitive matches. While traditional systems like Elo or Glicko estimate player skill using fixed update rules and manually tuned parameters, this approach uses probabilistic inference to jointly estimate multiple latent factors - such as persistent skill that evolves slowly over time, and transient momentum that captures recent form and psychological factors. providing probabilistic predictions that account for both the uncertainty in player abilities and the time elapsed since their last competition.
 
 ## 🚀 Features
 
